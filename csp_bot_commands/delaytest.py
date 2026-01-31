@@ -5,7 +5,8 @@ from random import randint
 from time import sleep
 from typing import Optional, Type, Union
 
-from csp_bot import BaseCommand, BaseCommandModel, BotCommand, Message, ReplyToOtherCommand
+from chatom import Message
+from csp_bot import BaseCommand, BaseCommandModel, BotCommand, ReplyToOtherCommand
 
 log = logging.getLogger(__name__)
 
@@ -54,16 +55,17 @@ class DelayTestCommand(ReplyToOtherCommand):
                 message = f"Delay test result: {self._resultmap[command.id].get()}"
                 self._resultmap.pop(command.id)
                 return Message(
-                    msg=message,
+                    content=message,
                     channel=command.channel,
+                    metadata={"backend": command.backend},
                 )
             else:
                 # reschedule for +5s
                 command.delay = datetime.now() + timedelta(seconds=5)
                 msg = Message(
-                    msg="All bots are currently assisting other customers, please stay on the line...",
+                    content="All bots are currently assisting other customers, please stay on the line...",
                     channel=command.channel,
-                    backend=command.backend,
+                    metadata={"backend": command.backend},
                 )
                 return [command, msg]
 

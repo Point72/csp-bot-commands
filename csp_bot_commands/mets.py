@@ -1,7 +1,8 @@
 import logging
 from typing import Optional, Type
 
-from csp_bot import BaseCommand, BaseCommandModel, BotCommand, Message, ReplyToOtherCommand
+from chatom import Message
+from csp_bot import BaseCommand, BaseCommandModel, BotCommand, ReplyToOtherCommand
 
 log = logging.getLogger(__name__)
 
@@ -114,9 +115,12 @@ class MetsCommand(ReplyToOtherCommand):
                 message = get_schedule()
                 kind = "Mets Schedule"
             else:
+                log.info("Getting standings...")
                 message = get_standings()
                 kind = "League Standings"
+                log.info(f"Got standings dataframe with {len(message)} rows")
 
+            log.info(f"Building response for backend: {command.backend}")
             if command.backend == "symphony":
                 message = message.to_html(index=False).replace('border="1"', "")
                 message = f'<expandable-card state="collapsed"><header>{kind}</header><body variant="default">{message}</body></expandable-card>'
@@ -127,19 +131,22 @@ class MetsCommand(ReplyToOtherCommand):
             else:
                 raise NotImplementedError(f"Unsupported backend: {command.backend}")
 
-            return Message(
-                msg=message,
+            log.info(f"Creating Message with content length: {len(message)}")
+            result = Message(
+                content=message,
                 channel=command.channel,
                 backend=command.backend,
             )
-        except ValueError:
-            # error pulling tables
-            log.exception("Error pulling Mets data")
+            log.info(f"Returning Message: {type(result)}")
+            return result
+        except Exception:
+            # error pulling tables or building response
+            log.exception("Error in Mets command")
             message = "Mets data unavailable right now!"
             if pandas is None:
                 message += " (pandas not installed)"
             return Message(
-                msg=message,
+                content=message,
                 channel=command.channel,
                 backend=command.backend,
             )

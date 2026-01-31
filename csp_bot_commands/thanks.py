@@ -2,7 +2,8 @@ import logging
 from random import choice, randint
 from typing import Optional, Type
 
-from csp_bot import BaseCommand, BaseCommandModel, BotCommand, Message, ReplyToOtherCommand, mention_user
+from chatom import Message
+from csp_bot import BaseCommand, BaseCommandModel, BotCommand, ReplyToOtherCommand, mention_user
 
 from .common import COLORS, MONEY, RANDOM_SINGULAR_NOUNS, a_or_an
 
@@ -26,8 +27,8 @@ class ThanksCommand(ReplyToOtherCommand):
 
     def execute(self, command: BotCommand) -> Optional[Message]:
         log.info(f"Thanks command: {command}")
-        author = mention_user(command.source.id, command.backend)
-        target = [mention_user(user.id, command.backend) for user in command.targets]
+        author = mention_user(command.source, command.backend)
+        target = [mention_user(user, command.backend) for user in command.targets]
         if not target:
             return
 
@@ -40,7 +41,7 @@ class ThanksCommand(ReplyToOtherCommand):
             gift = choice(RANDOM_SINGULAR_NOUNS)
             message = f"{author} thanks {' '.join(target)} with {a_or_an(color)} {color} {gift}"
         return Message(
-            msg=message,
+            content=message,
             channel=command.channel,
             backend=command.backend,
         )

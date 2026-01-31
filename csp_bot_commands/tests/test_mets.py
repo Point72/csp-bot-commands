@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pandas as pd
 import pytest
-from csp_bot import BotCommand, User
+from csp_bot import BotCommand, BotUser
 
 from csp_bot_commands.mets import MetsCommand, get_roster, get_schedule, get_standings, get_stats
 
@@ -144,22 +144,33 @@ class TestMets:
             msg = cmd.execute(
                 BotCommand(
                     backend=backend,
-                    channel="test_channel",
-                    source=User(
-                        id="123",
+                    channel_id="test_channel",
+                    channel_name="test_channel",
+                    source=BotUser(
+                        user_id="123",
+                        name="Test User",
+                        email="test@example.com",
+                        handle="testuser",
                     ),
-                    targets=(User(id="456"),),
+                    targets=(
+                        BotUser(
+                            user_id="456",
+                            name="Target User",
+                            email="target@example.com",
+                            handle="targetuser",
+                        ),
+                    ),
                     args=args,
                 )
             )
             assert msg is not None
             assert msg.backend == backend
-            assert msg.channel == "test_channel"
+            assert msg.channel.id == "test_channel"
             if args[0] == "stats":
-                assert "Mets Statistics" in msg.msg
+                assert "Mets Statistics" in msg.content
             elif args[0] == "roster":
-                assert "Mets Roster" in msg.msg
+                assert "Mets Roster" in msg.content
             elif args[0] == "schedule":
-                assert "Mets Schedule" in msg.msg
+                assert "Mets Schedule" in msg.content
             elif args[0] == "standings":
-                assert "League Standings" in msg.msg
+                assert "League Standings" in msg.content

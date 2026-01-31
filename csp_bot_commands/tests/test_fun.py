@@ -1,5 +1,5 @@
 import pytest
-from csp_bot import BotCommand, User
+from csp_bot import BotCommand, BotUser
 
 from csp_bot_commands.fun import FunCommand
 
@@ -30,29 +30,40 @@ class TestFun:
         msg = cmd.execute(
             BotCommand(
                 backend="slack",
-                channel="test_channel",
-                source=User(
-                    id="123",
+                channel_id="test_channel",
+                channel_name="test_channel",
+                source=BotUser(
+                    user_id="123",
+                    name="Test User",
+                    email="test@example.com",
+                    handle="testuser",
                 ),
-                targets=(User(id="456"),),
+                targets=(
+                    BotUser(
+                        user_id="456",
+                        name="Target User",
+                        email="target@example.com",
+                        handle="targetuser",
+                    ),
+                ),
                 args=args,
             )
         )
         assert msg is not None
         assert msg.backend == "slack"
-        assert msg.channel == "test_channel"
+        assert msg.channel.id == "test_channel"
 
         if args[0] == "icelandic":
-            assert msg.msg.startswith("<@123> consoles <@456> with an Icelandic folk saying:")
+            assert msg.content.startswith("<@123> consoles <@456> with an Icelandic folk saying:")
         elif args[0] == "german":
-            assert msg.msg.startswith("<@123> teaches <@456> some German:")
+            assert msg.content.startswith("<@123> teaches <@456> some German:")
         elif args[0] == "cocktail":
-            assert msg.msg.startswith("<@123> calls <@456> over to the")
+            assert msg.content.startswith("<@123> calls <@456> over to the")
         elif args[0] == "beer":
-            assert msg.msg.startswith("<@123> calls <@456> over to the")
+            assert msg.content.startswith("<@123> calls <@456> over to the")
         elif args[0] == "dune":
-            assert msg.msg.startswith("<@123> scrapes wisdom for <@456> off the sands of Arrakis:")
+            assert msg.content.startswith("<@123> scrapes wisdom for <@456> off the sands of Arrakis:")
         elif args[0] == "bush":
-            assert msg.msg.startswith("<@123> impresses <@456> with a quote from George W. Bush:")
+            assert msg.content.startswith("<@123> impresses <@456> with a quote from George W. Bush:")
         else:
             assert False

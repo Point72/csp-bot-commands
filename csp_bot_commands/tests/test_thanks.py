@@ -1,5 +1,5 @@
 import pytest
-from csp_bot import BotCommand, User
+from csp_bot import BotCommand, BotUser
 
 from csp_bot_commands.thanks import ThanksCommand
 
@@ -24,15 +24,26 @@ class TestThanks:
         msg = cmd.execute(
             BotCommand(
                 backend="slack",
-                channel="test_channel",
-                source=User(
-                    id="123",
+                channel_id="test_channel",
+                channel_name="test_channel",
+                source=BotUser(
+                    user_id="123",
+                    name="Test User",
+                    email="test@example.com",
+                    handle="testuser",
                 ),
-                targets=(User(id="456"),),
+                targets=(
+                    BotUser(
+                        user_id="456",
+                        name="Target User",
+                        email="target@example.com",
+                        handle="targetuser",
+                    ),
+                ),
                 args=args,
             )
         )
         assert msg is not None
         assert msg.backend == "slack"
-        assert msg.channel == "test_channel"
-        assert msg.msg.startswith("<@123> thanks <@456> with")
+        assert msg.channel.id == "test_channel"
+        assert msg.content.startswith("<@123> thanks <@456> with")
